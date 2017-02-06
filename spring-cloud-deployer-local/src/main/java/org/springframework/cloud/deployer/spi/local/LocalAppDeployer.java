@@ -35,10 +35,7 @@ import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.deployer.spi.app.AppDeployer;
-import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
-import org.springframework.cloud.deployer.spi.app.AppStatus;
-import org.springframework.cloud.deployer.spi.app.DeploymentState;
+import org.springframework.cloud.deployer.spi.app.*;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
@@ -53,7 +50,7 @@ import org.springframework.util.StringUtils;
  * @author Janne Valkealahti
  * @author Patrick Peralta
  */
-public class LocalAppDeployer extends AbstractLocalDeployerSupport implements AppDeployer {
+public class LocalAppDeployer extends AbstractLocalDeployerSupport implements MultipleStatusAppDeployer {
 
 	private Path logPathRoot;
 
@@ -167,6 +164,20 @@ public class LocalAppDeployer extends AbstractLocalDeployerSupport implements Ap
 		}
 		AppStatus status = builder.build();
 		return status;
+	}
+
+
+	@Override
+	public Map<String, AppStatus> statuses(String... ids) {
+		logger.info("Using new statuses method!");
+		Map<String, AppStatus> statusMap = new HashMap<String, AppStatus>();
+		for (String id : ids) {
+			logger.info("Getting status for id {}", id);
+			AppStatus status = status(id);
+			statusMap.put(id, status);
+		}
+		logger.info("Status map = {}" , statusMap);
+		return statusMap;
 	}
 
 	@PreDestroy
